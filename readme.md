@@ -37,13 +37,16 @@ type User {
 }
 ```
 
-### The **!** denotes that the value for the field cannot be null.
+### The **!** denotes that the value for the field cannot be null. aka **Required**
 
 `friends: [User!]`
 : an array of objects that are all Users, or null.
 
 `friends: [User]!`
 : an array of objects that can be Users or null, but will be an array.
+
+`friends: [User!]!`
+: an array User objects. Both the individual users and the overall data will not be null.
 
 ## Queries
 
@@ -70,13 +73,77 @@ type Query {
 }
 ```
 
-Query
-:
+Once you have defined your queries, you call them by supplying the arguments and specifiying the fields that you would like to retrieve.
+
+```
+{
+    user() {
+        name
+        age
+    }
+}
+```
 
 ## Mutations
 
 Mutation
 :
+
+# Apollo
+
+## ApolloServer
+
+ApolloServer is the "batteries-included" package to install on your server to get started. Its configured with helpful defaults and is built on express. When advanced configuration is required, you may need to use apollo-server-express instead. There are also server configurations that are particular to a serverless environment, or node framework.
+
+```
+const { ApolloServer } = requuire("apollo-server");
+
+const server = new ApolloServer({ typeDefs, resolvers });
+```
+
+ApolloServer takes two required parameters (unless you supply a schema directly), **_typeDefs_** and **_resolvers_**.
+
+### typeDefs
+
+typeDefs are your gql type schema that you feed to apollo server so that it knows what fields exist, and their types / relations.
+
+```
+const { gql } = require("apollo-server");
+
+const typeDefs = gql`
+  type User {
+    id: ID!
+    name: String!
+    username: String!
+    age: Int!
+    nationality: String!
+  }
+
+  type Query {
+    users: [User!]!
+  }
+`;
+
+module.exports = { typeDefs };
+```
+
+### Resolvers
+
+Resolves serve to tell ApolloServer what actions need to be performed to fetch the data for each query/action. In the example below, UserList is an array of User objects. We are telling our server that when it recieves the users query, it should return that data. Resolvers can be used to query apis, make SQL statements, anything to be fufilled when that action is specified to the server. Almost like redux reducers.
+
+```
+const { UserList } = require("../FakeData");
+
+const resolvers = {
+  Query: {
+    users() {
+      return UserList;
+    },
+  },
+};
+
+module.exports = { resolvers };
+```
 
 # Links
 
