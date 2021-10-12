@@ -50,7 +50,7 @@ type User {
 
 ## Queries
 
-Queries are types that are used to fetch data from the API. They can take arguments to filter results.
+Queries are types that are used to fetch data from the API. They can take arguments to filter results. Its a special top level entry point for queries that the client executes. In its simplest form, you can think of it as the mapping for "read" operations
 
 ```
 type Query {
@@ -86,8 +86,24 @@ Once you have defined your queries, you call them by supplying the arguments and
 
 ## Mutations
 
-Mutation
-:
+Mutations are the "write" operation of graphql. They are predefined operations to perform, and return the data that you specify.
+
+Its best practice to define a MutationResponse interface in order to handle failures or partial failures of operations that are called.
+
+```
+interface MutationResponse {
+  code: String!
+  success: Boolean!
+  message: String!
+}
+
+type UpdateUserEmailMutationResponse implements MutationResponse {
+  code: String!
+  success: Boolean!
+  message: String!
+  user: User
+}
+```
 
 # Apollo
 
@@ -127,6 +143,32 @@ const typeDefs = gql`
 module.exports = { typeDefs };
 ```
 
+#### enum
+
+enums can be used in typedefs for data that will be one of a predefined set. In the code below, Nationality must always be one of the enums provided, or it will throw an error
+
+```
+  type User {
+    id: ID!
+    name: String!
+    username: String!
+    age: Int!
+    nationality: Nationality!
+  }
+
+  type Query {
+    users: [User!]!
+  }
+
+  enum Nationality {
+    UNITED_STATES
+    GERMANY
+    PHILIPPINES
+    NORWAY
+    SWEEDEN
+  }
+```
+
 ### Resolvers
 
 Resolves serve to tell ApolloServer what actions need to be performed to fetch the data for each query/action. In the example below, UserList is an array of User objects. We are telling our server that when it recieves the users query, it should return that data. Resolvers can be used to query apis, make SQL statements, anything to be fufilled when that action is specified to the server. Almost like redux reducers.
@@ -145,7 +187,24 @@ const resolvers = {
 module.exports = { resolvers };
 ```
 
-# Links
+When you have a collection that references types that you define, apollo calls the resolvers in a chain, until it hits fields that are only scalars.
+
+Resolvers are passed four arguements
+
+- parent
+  - The return value of the previous resolver in the resolver chain
+  - Top level fields (IE Query) return the rootValue that can be supplied to the Apollo Server constructor.
+- args
+  - args supplied to field explicitly
+- context
+  - object shared across resolvers
+  - commonly used with dataloaders
+- info
+  - information about a resolvers execution state
+
+# Misc
 
 - [Job](https://www.apollographql.com/careers/job?id=eb28a876-d163-4532-bf36-18c3f0c3f89e)
 - [Tutorial](https://www.youtube.com/watch?v=cjl3ToMTrs0)
+- [PokeAPI](https://pokeapi.co/api/v2/)
+- [Interview Process 1](https://www.apollographql.com/blog/life-at-apollo/what-is-it-like-to-interview-with-apollo-part-1-of-2/)
